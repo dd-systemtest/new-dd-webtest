@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crew Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Login Form Styles */
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            text-align: center;
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.5s ease;
+        }
+
+        .login-container.hidden {
+            transform: translateY(-50px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .password-requirements {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        .password-requirements li {
+            margin: 3px 0;
+        }
+
+        .password-requirements li.valid {
+            color: #27ae60;
+        }
+
+        .password-requirements li.invalid {
+            color: #e74c3c;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+
+        .forgot-password {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #3498db;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: white;
+            height: 100%;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 100;
+            position: relative;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-header h2 {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .toggle-btn:hover {
+            color: #2980b9;
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            color: #7f8c8d;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: #f5f7fa;
+            color: #3498db;
+            border-left-color: #3498db;
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            font-size: 18px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin-right: 0;
+            font-size: 22px;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 15px 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .user-details h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .system-info {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .system-info p {
+            margin: 5px 0;
+            color: #34495e;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .system-info i {
+            margin-right: 10px;
+            color: #3498db;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .content-area {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            min-height: 400px;
+        }
+
+        .content-area h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        /* Table */
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        table th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background-color: #f5f7fa;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-right: 5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .view-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* Punch Clock */
+        .punch-clock {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .punch-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+
+        .punch-status {
+            font-size: 24px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        /* Announcements Section */
+        .announcements-section {
+            margin-top: 30px;
+        }
+
+        .announcements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .announcements-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .announcement-item {
+            background: white;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .announcement-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .announcement-text {
+            font-size: 16px;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .announcement-date {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: right;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.5s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .notification.success {
+            border-left-color: #2ecc71;
+        }
+
+        .notification.success i {
+            color: #2ecc71;
+        }
+
+        .notification.warning {
+            border-left-color: #f39c12;
+        }
+
+        .notification.warning i {
+            color: #f39c12;
+        }
+
+        .notification.error {
+            border-left-color: #e74c3c;
+        }
+
+        .notification.error i {
+            color: #e74c3c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -250px;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div class="login-container" id="loginContainer">
+            <div class="login-header">
+                <h1>Crew Management System</h1>
+                <p>Enter your credentials to access the system</p>
+            </div>
+            
+            <div class="input-group">
+                <label for="userId">User ID</label>
+                <input type="text" id="userId" placeholder="Enter your user ID">
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+                
+                <ul class="password-requirements">
+                    <li id="length">At least 8 characters</li>
+                    <li id="uppercase">At least one uppercase letter</li>
+                    <li id="lowercase">At least one lowercase letter</li>
+                    <li id="number">At least one number</li>
+                    <li id="special">At least one special character</li>
+                </ul>
+            </div>
+            
+            <button class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            
+            <a href="#" class="forgot-password" id="forgotPasswordBtn">
+                <i class="fas fa-key"></i> Forgot Password?
+            </a>
+        </div>
+        
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Crew Management</h2>
+                    <button class="toggle-btn" id="toggleSidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                
+                <div class="sidebar-menu">
+                    <!-- Head of IT Menu Items -->
+                    <a href="#" class="menu-item" data-feature="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="punch">
+                        <i class="fas fa-clock"></i>
+                        <span>Punch Clock</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="attendance">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Amend Attendance</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="create">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Create New Crew</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="edit">
+                        <i class="fas fa-user-edit"></i>
+                        <span>Edit Crew</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="terminate">
+                        <i class="fas fa-user-times"></i>
+                        <span>Terminate Crew</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="position">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Edit Job Position</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="access">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Assign Access</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="changepassword">
+                        <i class="fas fa-key"></i>
+                        <span>Change Password</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="logs">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>System Logs</span>
+                    </a>
+                    
+                    <!-- Crew Menu Items -->
+                    <a href="#" class="menu-item" data-feature="punchin">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Punch In</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="punchout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Punch Out</span>
+                    </a>
+                    <a href="#" class="menu-item" data-feature="records">
+                        <i class="fas fa-history"></i>
+                        <span>Attendance Records</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="dashboard-header">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">D</div>
+                        <div class="user-details">
+                            <h3 id="userName">Danial (ID: 0001)</h3>
+                            <p id="userRole">Head of IT Development</p>
+                        </div>
+                    </div>
+                    
+                    <div class="system-info">
+                        <p><i class="fas fa-calendar"></i> <span id="currentDate">June 15, 2023</span></p>
+                        <p><i class="fas fa-clock"></i> <span id="currentTime">10:30 AM</span></p>
+                        <p><i class="fas fa-network-wired"></i> IP: <span id="userIP">192.168.1.100</span></p>
+                    </div>
+                </div>
+                
+                <div class="content-area" id="contentArea">
+                    <h2>Dashboard</h2>
+                    <div class="feature-grid" id="featureGrid">
+                        <!-- Features will be populated based on role -->
+                    </div>
+                    
+                    <!-- Announcements Section -->
+                    <div class="announcements-section">
+                        <div class="announcements-header">
+                            <h3>Announcements</h3>
+                            <button class="btn" id="addAnnouncementBtn">
+                                <i class="fas fa-plus"></i> Add Announcement
+                            </button>
+                        </div>
+                        <div class="announcements-list" id="announcementsList">
+                            <!-- Announcements will be populated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notificationMessage">Notification message</span>
+    </div>
+    
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgotPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Password</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="resetUserId">User ID</label>
+                    <input type="text" id="resetUserId" required>
+                </div>
+                <div class="form-group">
+                    <label for="resetEmail">Email Address</label>
+                    <input type="email" id="resetEmail" required>
+                </div>
+                <button type="submit" class="btn">Send Reset Link</button>
+                <button type="button" class="btn btn-secondary" id="cancelForgotPassword">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="changePasswordForm">
+                <input type="hidden" id="changePasswordUserId">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div class="password-requirements" style="margin-top: 10px;">
+                    <li id="changeLength">At least 8 characters</li>
+                    <li id="changeUppercase">At least one uppercase letter</li>
+                    <li id="changeLowercase">At least one lowercase letter</li>
+                    <li id="changeNumber">At least one number</li>
+                    <li id="changeSpecial">At least one special character</li>
+                </div>
+                <button type="submit" class="btn">Update Password</button>
+                <button type="button" class="btn btn-secondary" id="cancelChangePassword">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Create Crew Modal -->
+    <div class="modal" id="createCrewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Crew Member</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="createCrewForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCrewId">User ID</label>
+                        <input type="text" id="newCrewId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newCrewName">Full Name</label>
+                        <input type="text" id="newCrewName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCrewPassword">Password</label>
+                        <input type="password" id="newCrewPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newCrewRole">Role</label>
+                        <select id="newCrewRole" required>
+                            <option value="Crew Member">Crew Member</option>
+                            <option value="Team Lead">Team Lead</option>
+                            <option value="Supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newCrewPosition">Job Position</label>
+                    <input type="text" id="newCrewPosition" required>
+                </div>
+                <div class="form-group">
+                    <label for="newCrewEmail">Email</label>
+                    <input type="email" id="newCrewEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="newCrewPhone">Phone Number</label>
+                    <input type="tel" id="newCrewPhone" required>
+                </div>
+                <button type="submit" class="btn">Create Crew Member</button>
+                <button type="button" class="btn btn-secondary" id="cancelCreateCrew">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Crew Modal -->
+    <div class="modal" id="editCrewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Crew Member</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="editCrewForm">
+                <input type="hidden" id="editCrewId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCrewName">Full Name</label>
+                        <input type="text" id="editCrewName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCrewRole">Role</label>
+                        <select id="editCrewRole" required>
+                            <option value="Crew Member">Crew Member</option>
+                            <option value="Team Lead">Team Lead</option>
+                            <option value="Supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editCrewPosition">Job Position</label>
+                    <input type="text" id="editCrewPosition" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCrewEmail">Email</label>
+                    <input type="email" id="editCrewEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCrewPhone">Phone Number</label>
+                    <input type="tel" id="editCrewPhone" required>
+                </div>
+                <button type="submit" class="btn">Save Changes</button>
+                <button type="button" class="btn btn-secondary" id="cancelEditCrew">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Position Modal -->
+    <div class="modal" id="editPositionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Job Position</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="editPositionForm">
+                <input type="hidden" id="positionCrewId">
+                <div class="form-group">
+                    <label for="currentPosition">Current Position</label>
+                    <input type="text" id="currentPosition" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="newPosition">New Position</label>
+                    <input type="text" id="newPosition" required>
+                </div>
+                <div class="form-group">
+                    <label for="positionChangeReason">Reason for Change</label>
+                    <textarea id="positionChangeReason" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Update Position</button>
+                <button type="button" class="btn btn-secondary" id="cancelPositionChange">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Termination Modal -->
+    <div class="modal" id="terminateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Terminate Crew Member</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="terminateForm">
+                <input type="hidden" id="terminateCrewId">
+                <div class="form-group">
+                    <label for="terminateCrewName">Crew Member</label>
+                    <input type="text" id="terminateCrewName" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="terminationReason">Reason for Termination</label>
+                    <textarea id="terminationReason" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="terminationDate">Termination Date</label>
+                    <input type="date" id="terminationDate" required>
+                </div>
+                <button type="submit" class="btn btn-danger">Terminate</button>
+                <button type="button" class="btn btn-secondary" id="cancelTermination">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Assign Access Modal -->
+    <div class="modal" id="assignAccessModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Assign Access Permissions</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="assignAccessForm">
+                <div class="form-group">
+                    <label for="accessCrewId">Select Crew Member</label>
+                    <select id="accessCrewId" required>
+                        <option value="">Select a crew member</option>
+                        ${Object.keys(users).filter(id => id !== '0001').map(id => 
+                            `<option value="${id}">${users[id].name} (ID: ${id})</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="accessPermissions">Permissions</label>
+                    <div style="margin-top: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <input type="checkbox" id="accessPunchIn" name="permissions" value="punch_in">
+                            <label for="accessPunchIn">Punch In</label>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <input type="checkbox" id="accessPunchOut" name="permissions" value="punch_out">
+                            <label for="accessPunchOut">Punch Out</label>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <input type="checkbox" id="accessViewRecords" name="permissions" value="view_records">
+                            <label for="accessViewRecords">View Attendance Records</label>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <input type="checkbox" id="accessAmendAttendance" name="permissions" value="amend_attendance">
+                            <label for="accessAmendAttendance">Amend Attendance</label>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <input type="checkbox" id="accessEditProfile" name="permissions" value="edit_profile">
+                            <label for="accessEditProfile">Edit Profile</label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Assign Permissions</button>
+                <button type="button" class="btn btn-secondary" id="cancelAssignAccess">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Announcement Modal -->
+    <div class="modal" id="addAnnouncementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Announcement</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="addAnnouncementForm">
+                <div class="form-group">
+                    <label for="announcementText">Announcement</label>
+                    <textarea id="announcementText" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn">Post Announcement</button>
+                <button type="button" class="btn btn-secondary" id="cancelAddAnnouncement">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboard = document.getElementById('dashboard');
+        const loginBtn = document.getElementById('loginBtn');
+        const userIdInput = document.getElementById('userId');
+        const passwordInput = document.getElementById('password');
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
+        const userIP = document.getElementById('userIP');
+        const currentDate = document.getElementById('currentDate');
+        const currentTime = document.getElementById('currentTime');
+        const contentArea = document.getElementById('contentArea');
+        const featureGrid = document.getElementById('featureGrid');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notificationMessage');
+        
+        // Modal elements
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+        const changePasswordModal = document.getElementById('changePasswordModal');
+        const createCrewModal = document.getElementById('createCrewModal');
+        const editCrewModal = document.getElementById('editCrewModal');
+        const editPositionModal = document.getElementById('editPositionModal');
+        const terminateModal = document.getElementById('terminateModal');
+        const assignAccessModal = document.getElementById('assignAccessModal');
+        const addAnnouncementModal = document.getElementById('addAnnouncementModal');
+        
+        // Password requirements elements
+        const lengthReq = document.getElementById('length');
+        const uppercaseReq = document.getElementById('uppercase');
+        const lowercaseReq = document.getElementById('lowercase');
+        const numberReq = document.getElementById('number');
+        const specialReq = document.getElementById('special');
+        const changeLengthReq = document.getElementById('changeLength');
+        const changeUppercaseReq = document.getElementById('changeUppercase');
+        const changeLowercaseReq = document.getElementById('changeLowercase');
+        const changeNumberReq = document.getElementById('changeNumber');
+        const changeSpecialReq = document.getElementById('changeSpecial');
+        
+        // System data
+        const users = {
+            '0001': {
+                name: 'Danial',
+                role: 'Head of IT Development',
+                password: 'Passw0rd!', // In real app, this would be hashed
+                avatar: 'D',
+                position: 'IT Director',
+                email: 'danial@company.com',
+                phone: '123-456-7890',
+                permissions: {
+                    punch_in: true,
+                    punch_out: true,
+                    view_records: true,
+                    amend_attendance: true,
+                    edit_profile: true
+                }
+            },
+            '0002': {
+                name: 'John Doe',
+                role: 'Crew Member',
+                password: 'CrewPass1!',
+                avatar: 'J',
+                position: 'Developer',
+                email: 'john@company.com',
+                phone: '123-456-7891',
+                permissions: {
+                    punch_in: true,
+                    punch_out: true,
+                    view_records: true,
+                    amend_attendance: false,
+                    edit_profile: false
+                }
+            },
+            '0003': {
+                name: 'Jane Smith',
+                role: 'Crew Member',
+                password: 'CrewPass2@',
+                avatar: 'J',
+                position: 'Designer',
+                email: 'jane@company.com',
+                phone: '123-456-7892',
+                permissions: {
+                    punch_in: true,
+                    punch_out: true,
+                    view_records: true,
+                    amend_attendance: false,
+                    edit_profile: false
+                }
+            }
+        };
+        
+        // Attendance records
+        let attendanceRecords = {
+            '0002': [
+                { date: '2023-06-15', punchIn: '09:00', punchOut: '17:00' },
+                { date: '2023-06-16', punchIn: '08:45', punchOut: '17:15' }
+            ],
+            '0003': [
+                { date: '2023-06-15', punchIn: '09:15', punchOut: '16:45' },
+                { date: '2023-06-16', punchIn: '09:00', punchOut: '17:00' }
+            ]
+        };
+        
+        // Announcements
+        let announcements = [
+            { id: 1, text: 'Welcome to the Crew Management System!', date: '2023-06-15', author: 'Danial' },
+            { id: 2, text: 'Maintenance scheduled for this weekend.', date: '2023-06-14', author: 'Danial' }
+        ];
+        
+        // System logs
+        let systemLogs = [
+            { timestamp: '2023-06-15 09:00:00', userId: '0002', action: 'Punch In' },
+            { timestamp: '2023-06-15 17:00:00', userId: '0002', action: 'Punch Out' },
+            { timestamp: '2023-06-15 09:15:00', userId: '0003', action: 'Punch In' },
+            { timestamp: '2023-06-15 16:45:00', userId: '0003', action: 'Punch Out' }
+        ];
+        
+        // Current user state
+        let currentUser = null;
+        let currentFeature = 'dashboard';
+        
+        // Password validation
+        function validatePassword(password) {
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            
+            lengthReq.className = hasLength ? 'valid' : 'invalid';
+            uppercaseReq.className = hasUppercase ? 'valid' : 'invalid';
+            lowercaseReq.className = hasLowercase ? 'valid' : 'invalid';
+            numberReq.className = hasNumber ? 'valid' : 'invalid';
+            specialReq.className = hasSpecial ? 'valid' : 'invalid';
+            
+            return hasLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
+        }
+        
+        // Change password validation
+        function validateChangePassword(password) {
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            
+            changeLengthReq.className = hasLength ? 'valid' : 'invalid';
+            changeUppercaseReq.className = hasUppercase ? 'valid' : 'invalid';
+            changeLowercaseReq.className = hasLowercase ? 'valid' : 'invalid';
+            changeNumberReq.className = hasNumber ? 'valid' : 'invalid';
+            changeSpecialReq.className = hasSpecial ? 'valid' : 'invalid';
+            
+            return hasLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
+        }
+        
+        // Update system time
+        function updateSystemTime() {
+            const now = new Date();
+            currentDate.textContent = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            currentTime.textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            notification.className = `notification ${type}`;
+            notificationMessage.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Populate features based on role
+        function populateFeatures(role) {
+            featureGrid.innerHTML = '';
+            
+            if (role === 'Head of IT Development') {
+                const features = [
+                    { name: 'Punch Clock', icon: 'fas fa-clock', feature: 'punch' },
+                    { name: 'Amend Attendance', icon: 'fas fa-calendar-check', feature: 'attendance' },
+                    { name: 'Create New Crew', icon: 'fas fa-user-plus', feature: 'create' },
+                    { name: 'Edit Crew', icon: 'fas fa-user-edit', feature: 'edit' },
+                    { name: 'Terminate Crew', icon: 'fas fa-user-times', feature: 'terminate' },
+                    { name: 'Edit Job Position', icon: 'fas fa-briefcase', feature: 'position' },
+                    { name: 'Assign Access', icon: 'fas fa-user-shield', feature: 'access' },
+                    { name: 'Change Password', icon: 'fas fa-key', feature: 'changepassword' },
+                    { name: 'System Logs', icon: 'fas fa-clipboard-list', feature: 'logs' }
+                ];
+                
+                features.forEach(feature => {
+                    const card = document.createElement('div');
+                    card.className = 'feature-card';
+                    card.innerHTML = `
+                        <i class="${feature.icon}"></i>
+                        <h3>${feature.name}</h3>
+                        <p>Click to access</p>
+                    `;
+                    card.addEventListener('click', () => {
+                        showFeature(feature.feature);
+                    });
+                    featureGrid.appendChild(card);
+                });
+            } else {
+                const features = [
+                    { name: 'Punch In', icon: 'fas fa-sign-in-alt', feature: 'punchin' },
+                    { name: 'Punch Out', icon: 'fas fa-sign-out-alt', feature: 'punchout' },
+                    { name: 'Attendance Records', icon: 'fas fa-history', feature: 'records' },
+                    { name: 'Change Password', icon: 'fas fa-key', feature: 'changepassword' }
+                ];
+                
+                features.forEach(feature => {
+                    const card = document.createElement('div');
+                    card.className = 'feature-card';
+                    card.innerHTML = `
+                        <i class="${feature.icon}"></i>
+                        <h3>${feature.name}</h3>
+                        <p>Click to access</p>
+                    `;
+                    card.addEventListener('click', () => {
+                        if (feature.feature === 'punchin') {
+                            punchAction('in');
+                        } else if (feature.feature === 'punchout') {
+                            punchAction('out');
+                        } else {
+                            showFeature(feature.feature);
+                        }
+                    });
+                    featureGrid.appendChild(card);
+                });
+            }
+        }
+        
+        // Show specific feature content
+        function showFeature(feature) {
+            currentFeature = feature;
+            
+            // Update active menu item
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.feature === feature) {
+                    item.classList.add('active');
+                }
+            });
+            
+            switch(feature) {
+                case 'dashboard':
+                    contentArea.innerHTML = `
+                        <h2>Dashboard</h2>
+                        <div class="feature-grid" id="featureGrid">
+                            <!-- Features will be populated based on role -->
+                        </div>
+                        
+                        <!-- Announcements Section -->
+                        <div class="announcements-section">
+                            <div class="announcements-header">
+                                <h3>Announcements</h3>
+                                <button class="btn" id="addAnnouncementBtn">
+                                    <i class="fas fa-plus"></i> Add Announcement
+                                </button>
+                            </div>
+                            <div class="announcements-list" id="announcementsList">
+                                <!-- Announcements will be populated -->
+                            </div>
+                        </div>
+                    `;
+                    populateFeatures(currentUser.role);
+                    populateAnnouncements();
+                    break;
+                    
+                case 'punch':
+                    showPunchClock();
+                    break;
+                    
+                case 'attendance':
+                    showAmendAttendance();
+                    break;
+                    
+                case 'create':
+                    showCreateCrew();
+                    break;
+                    
+                case 'edit':
+                    showEditCrew();
+                    break;
+                    
+                case 'terminate':
+                    showTerminateCrew();
+                    break;
+                    
+                case 'position':
+                    showEditPosition();
+                    break;
+                    
+                case 'access':
+                    showAssignAccess();
+                    break;
+                    
+                case 'changepassword':
+                    showChangePassword();
+                    break;
+                    
+                case 'logs':
+                    showSystemLogs();
+                    break;
+                    
+                case 'records':
+                    showAttendanceRecords();
+                    break;
+                    
+                case 'punchin':
+                    punchAction('in');
+                    break;
+                    
+                case 'punchout':
+                    punchAction('out');
+                    break;
+            }
+        }
+        
+        // Show punch clock
+        function showPunchClock() {
+            contentArea.innerHTML = `
+                <h2>Punch Clock</h2>
+                <div class="punch-clock">
+                    <div class="punch-display" id="punchDisplay">--:--</div>
+                    <div class="punch-status" id="punchStatus">Not punched in</div>
+                    <button class="btn" id="punchInBtn">Punch In</button>
+                    <button class="btn btn-secondary" id="punchOutBtn" disabled>Punch Out</button>
+                </div>
+            `;
+            
+            const punchDisplay = document.getElementById('punchDisplay');
+            const punchStatus = document.getElementById('punchStatus');
+            const punchInBtn = document.getElementById('punchInBtn');
+            const punchOutBtn = document.getElementById('punchOutBtn');
+            
+            // Update time
+            function updateTime() {
+                const now = new Date();
+                punchDisplay.textContent = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Check if already punched in
+            const today = new Date().toISOString().split('T')[0];
+            const userRecords = attendanceRecords[currentUser.id] || [];
+            const todayRecord = userRecords.find(record => record.date === today);
+            
+            if (todayRecord && todayRecord.punchIn && !todayRecord.punchOut) {
+                punchStatus.textContent = 'Currently punched in';
+                punchInBtn.disabled = true;
+                punchOutBtn.disabled = false;
+            } else {
+                punchStatus.textContent = 'Not punched in';
+                punchInBtn.disabled = false;
+                punchOutBtn.disabled = true;
+            }
+            
+            // Punch in/out handlers
+            punchInBtn.addEventListener('click', () => {
+                punchAction('in');
+            });
+            
+            punchOutBtn.addEventListener('click', () => {
+                punchAction('out');
+            });
+        }
+        
+        // Punch in/out action
+        function punchAction(action) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const dateString = now.toISOString().split('T')[0];
+            
+            if (!attendanceRecords[currentUser.id]) {
+                attendanceRecords[currentUser.id] = [];
+            }
+            
+            const userRecords = attendanceRecords[currentUser.id];
+            const todayRecord = userRecords.find(record => record.date === dateString);
+            
+            if (action === 'in') {
+                if (todayRecord) {
+                    todayRecord.punchIn = timeString;
+                } else {
+                    userRecords.push({
+                        date: dateString,
+                        punchIn: timeString,
+                        punchOut: null
+                    });
+                }
+                showNotification(`Successfully punched in at ${timeString}`, 'success');
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: now.toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: 'Punch In'
+                });
+                
+                // Update UI
+                if (currentFeature === 'punch') {
+                    showPunchClock();
+                }
+            } else if (action === 'out') {
+                if (todayRecord && todayRecord.punchIn) {
+                    todayRecord.punchOut = timeString;
+                    showNotification(`Successfully punched out at ${timeString}`, 'success');
+                    
+                    // Add to system logs
+                    systemLogs.push({
+                        timestamp: now.toISOString().replace('T', ' ').substring(0, 19),
+                        userId: currentUser.id,
+                        action: 'Punch Out'
+                    });
+                    
+                    // Update UI
+                    if (currentFeature === 'punch') {
+                        showPunchClock();
+                    }
+                } else {
+                    showNotification('Cannot punch out without punching in first', 'error');
+                }
+            }
+        }
+        
+        // Show amend attendance
+        function showAmendAttendance() {
+            contentArea.innerHTML = `
+                <h2>Amend Attendance</h2>
+                <div class="form-group">
+                    <label for="attendanceCrewId">Select Crew Member</label>
+                    <select id="attendanceCrewId">
+                        <option value="">Select a crew member</option>
+                        ${Object.keys(users).filter(id => id !== '0001').map(id => 
+                            `<option value="${id}">${users[id].name} (ID: ${id})</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div id="attendanceDetails" style="display: none;">
+                    <div class="table-container">
+                        <table id="attendanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Punch In</th>
+                                    <th>Punch Out</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Records will be populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn" id="addAttendanceBtn">Add Attendance Record</button>
+                </div>
+            `;
+            
+            const attendanceCrewId = document.getElementById('attendanceCrewId');
+            const attendanceDetails = document.getElementById('attendanceDetails');
+            const attendanceTable = document.getElementById('attendanceTable').querySelector('tbody');
+            const addAttendanceBtn = document.getElementById('addAttendanceBtn');
+            
+            attendanceCrewId.addEventListener('change', () => {
+                const crewId = attendanceCrewId.value;
+                if (crewId) {
+                    attendanceDetails.style.display = 'block';
+                    populateAttendanceTable(crewId);
+                } else {
+                    attendanceDetails.style.display = 'none';
+                }
+            });
+            
+            addAttendanceBtn.addEventListener('click', () => {
+                const crewId = attendanceCrewId.value;
+                if (crewId) {
+                    // Show modal to add attendance record
+                    showAddAttendanceModal(crewId);
+                }
+            });
+        }
+        
+        // Populate attendance table
+        function populateAttendanceTable(crewId) {
+            const attendanceTable = document.getElementById('attendanceTable').querySelector('tbody');
+            attendanceTable.innerHTML = '';
+            
+            const userRecords = attendanceRecords[crewId] || [];
+            
+            if (userRecords.length === 0) {
+                attendanceTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No attendance records found</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            userRecords.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.punchIn || '-'}</td>
+                    <td>${record.punchOut || '-'}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-index="${index}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                attendanceTable.appendChild(row);
+            });
+            
+            // Add event listeners to edit/delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    const record = attendanceRecords[crewId][index];
+                    showEditAttendanceModal(crewId, index, record);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.currentTarget.dataset.index;
+                    attendanceRecords[crewId].splice(index, 1);
+                    populateAttendanceTable(crewId);
+                    showNotification('Attendance record deleted', 'success');
+                    
+                    // Add to system logs
+                    systemLogs.push({
+                        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                        userId: currentUser.id,
+                        action: `Deleted attendance record for ${users[crewId].name}`
+                    });
+                });
+            });
+        }
+        
+        // Show add attendance modal
+        function showAddAttendanceModal(crewId) {
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Add Attendance Record</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="addAttendanceForm">
+                        <div class="form-group">
+                            <label for="recordDate">Date</label>
+                            <input type="date" id="recordDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="punchInTime">Punch In Time</label>
+                            <input type="time" id="punchInTime">
+                        </div>
+                        <div class="form-group">
+                            <label for="punchOutTime">Punch Out Time</label>
+                            <input type="time" id="punchOutTime">
+                        </div>
+                        <button type="submit" class="btn">Add Record</button>
+                        <button type="button" class="btn btn-secondary" id="cancelAddAttendance">Cancel</button>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            const form = document.getElementById('addAttendanceForm');
+            const cancelBtn = document.getElementById('cancelAddAttendance');
+            const closeBtn = modal.querySelector('.close-modal');
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const date = document.getElementById('recordDate').value;
+                const punchIn = document.getElementById('punchInTime').value;
+                const punchOut = document.getElementById('punchOutTime').value;
+                
+                if (!attendanceRecords[crewId]) {
+                    attendanceRecords[crewId] = [];
+                }
+                
+                // Check if record already exists
+                const existingRecord = attendanceRecords[crewId].find(r => r.date === date);
+                if (existingRecord) {
+                    showNotification('Attendance record already exists for this date', 'error');
+                    return;
+                }
+                
+                attendanceRecords[crewId].push({
+                    date,
+                    punchIn: punchIn || null,
+                    punchOut: punchOut || null
+                });
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: `Added attendance record for ${users[crewId].name}`
+                });
+                
+                modal.remove();
+                populateAttendanceTable(crewId);
+                showNotification('Attendance record added', 'success');
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            closeBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+        }
+        
+        // Show edit attendance modal
+        function showEditAttendanceModal(crewId, index, record) {
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Attendance Record</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <form id="editAttendanceForm">
+                        <div class="form-group">
+                            <label for="editRecordDate">Date</label>
+                            <input type="date" id="editRecordDate" value="${record.date}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPunchInTime">Punch In Time</label>
+                            <input type="time" id="editPunchInTime" value="${record.punchIn || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="editPunchOutTime">Punch Out Time</label>
+                            <input type="time" id="editPunchOutTime" value="${record.punchOut || ''}">
+                        </div>
+                        <button type="submit" class="btn">Update Record</button>
+                        <button type="button" class="btn btn-secondary" id="cancelEditAttendance">Cancel</button>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            const form = document.getElementById('editAttendanceForm');
+            const cancelBtn = document.getElementById('cancelEditAttendance');
+            const closeBtn = modal.querySelector('.close-modal');
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const date = document.getElementById('editRecordDate').value;
+                const punchIn = document.getElementById('editPunchInTime').value;
+                const punchOut = document.getElementById('editPunchOutTime').value;
+                
+                attendanceRecords[crewId][index] = {
+                    date,
+                    punchIn: punchIn || null,
+                    punchOut: punchOut || null
+                };
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: `Updated attendance record for ${users[crewId].name}`
+                });
+                
+                modal.remove();
+                populateAttendanceTable(crewId);
+                showNotification('Attendance record updated', 'success');
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            closeBtn.addEventListener('click', () => {
+                modal.remove();
+            });
+        }
+        
+        // Show create crew
+        function showCreateCrew() {
+            createCrewModal.classList.add('active');
+        }
+        
+        // Show edit crew
+        function showEditCrew() {
+            contentArea.innerHTML = `
+                <h2>Edit Crew Members</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Position</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crewTableBody">
+                            <!-- Crew members will be populated -->
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const crewTableBody = document.getElementById('crewTableBody');
+            
+            Object.keys(users).filter(id => id !== '0001').forEach(id => {
+                const user = users[id];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.role}</td>
+                    <td>${user.position}</td>
+                    <td>${user.email || '-'}</td>
+                    <td>${user.phone || '-'}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-id="${id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" data-id="${id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                crewTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to edit/delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    showEditCrewModal(id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    if (confirm(`Are you sure you want to delete ${users[id].name}?`)) {
+                        delete users[id];
+                        showEditCrew();
+                        showNotification('Crew member deleted', 'success');
+                        
+                        // Add to system logs
+                        systemLogs.push({
+                            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                            userId: currentUser.id,
+                            action: `Deleted crew member ${users[id].name}`
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Show edit crew modal
+        function showEditCrewModal(id) {
+            const user = users[id];
+            
+            editCrewModal.querySelector('#editCrewId').value = id;
+            editCrewModal.querySelector('#editCrewName').value = user.name;
+            editCrewModal.querySelector('#editCrewRole').value = user.role;
+            editCrewModal.querySelector('#editCrewPosition').value = user.position;
+            editCrewModal.querySelector('#editCrewEmail').value = user.email || '';
+            editCrewModal.querySelector('#editCrewPhone').value = user.phone || '';
+            
+            editCrewModal.classList.add('active');
+        }
+        
+        // Show edit position
+        function showEditPosition() {
+            contentArea.innerHTML = `
+                <h2>Edit Job Positions</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Current Position</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionTableBody">
+                            <!-- Crew members will be populated -->
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const positionTableBody = document.getElementById('positionTableBody');
+            
+            Object.keys(users).filter(id => id !== '0001').forEach(id => {
+                const user = users[id];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.position}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-id="${id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                positionTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    showEditPositionModal(id);
+                });
+            });
+        }
+        
+        // Show edit position modal
+        function showEditPositionModal(id) {
+            const user = users[id];
+            
+            editPositionModal.querySelector('#positionCrewId').value = id;
+            editPositionModal.querySelector('#currentPosition').value = user.position;
+            
+            editPositionModal.classList.add('active');
+        }
+        
+        // Show terminate crew
+        function showTerminateCrew() {
+            contentArea.innerHTML = `
+                <h2>Terminate Crew Members</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="terminateTableBody">
+                            <!-- Crew members will be populated -->
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const terminateTableBody = document.getElementById('terminateTableBody');
+            
+            Object.keys(users).filter(id => id !== '0001').forEach(id => {
+                const user = users[id];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button class="action-btn delete-btn" data-id="${id}">
+                            <i class="fas fa-user-times"></i>
+                        </button>
+                    </td>
+                `;
+                terminateTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    showTerminateModal(id);
+                });
+            });
+        }
+        
+        // Show terminate modal
+        function showTerminateModal(id) {
+            const user = users[id];
+            
+            terminateModal.querySelector('#terminateCrewId').value = id;
+            terminateModal.querySelector('#terminateCrewName').value = user.name;
+            
+            terminateModal.classList.add('active');
+        }
+        
+        // Show system logs
+        function showSystemLogs() {
+            contentArea.innerHTML = `
+                <h2>System Logs</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>User ID</th>
+                                <th>User Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <!-- Logs will be populated -->
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const logsTableBody = document.getElementById('logsTableBody');
+            
+            // Sort logs by timestamp (newest first)
+            const sortedLogs = [...systemLogs].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            sortedLogs.forEach(log => {
+                const row = document.createElement('tr');
+                const userName = users[log.userId]?.name || 'Unknown';
+                row.innerHTML = `
+                    <td>${log.timestamp}</td>
+                    <td>${log.userId}</td>
+                    <td>${userName}</td>
+                    <td>${log.action}</td>
+                `;
+                logsTableBody.appendChild(row);
+            });
+        }
+        
+        // Show attendance records
+        function showAttendanceRecords() {
+            contentArea.innerHTML = `
+                <h2>Attendance Records</h2>
+                <div class="form-group">
+                    <label for="recordsCrewId">Select Crew Member</label>
+                    <select id="recordsCrewId">
+                        <option value="">Select a crew member</option>
+                        ${Object.keys(users).filter(id => id !== '0001').map(id => 
+                            `<option value="${id}">${users[id].name} (ID: ${id})</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div id="recordsDetails" style="display: none;">
+                    <div class="table-container">
+                        <table id="recordsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Punch In</th>
+                                    <th>Punch Out</th>
+                                    <th>Work Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Records will be populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            const recordsCrewId = document.getElementById('recordsCrewId');
+            const recordsDetails = document.getElementById('recordsDetails');
+            const recordsTable = document.getElementById('recordsTable').querySelector('tbody');
+            
+            recordsCrewId.addEventListener('change', () => {
+                const crewId = recordsCrewId.value;
+                if (crewId) {
+                    recordsDetails.style.display = 'block';
+                    populateRecordsTable(crewId);
+                } else {
+                    recordsDetails.style.display = 'none';
+                }
+            });
+        }
+        
+        // Populate records table
+        function populateRecordsTable(crewId) {
+            const recordsTable = document.getElementById('recordsTable').querySelector('tbody');
+            recordsTable.innerHTML = '';
+            
+            const userRecords = attendanceRecords[crewId] || [];
+            
+            if (userRecords.length === 0) {
+                recordsTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No attendance records found</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Sort records by date (newest first)
+            const sortedRecords = [...userRecords].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedRecords.forEach(record => {
+                const row = document.createElement('tr');
+                const punchIn = record.punchIn || '--:--';
+                const punchOut = record.punchOut || '--:--';
+                
+                // Calculate work hours
+                let workHours = '--';
+                if (record.punchIn && record.punchOut) {
+                    const start = new Date(`1970-01-01T${record.punchIn}:00`);
+                    const end = new Date(`1970-01-01T${record.punchOut}:00`);
+                    const diffMs = end - start;
+                    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    workHours = `${diffHrs}h ${diffMins}m`;
+                }
+                
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${punchIn}</td>
+                    <td>${punchOut}</td>
+                    <td>${workHours}</td>
+                `;
+                recordsTable.appendChild(row);
+            });
+        }
+        
+        // Event listeners for modals and forms
+        function setupModalEventListeners() {
+            // Create Crew Modal
+            document.getElementById('createCrewForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('newCrewId').value;
+                const name = document.getElementById('newCrewName').value;
+                const password = document.getElementById('newCrewPassword').value;
+                const role = document.getElementById('newCrewRole').value;
+                const position = document.getElementById('newCrewPosition').value;
+                const email = document.getElementById('newCrewEmail').value;
+                const phone = document.getElementById('newCrewPhone').value;
+                
+                // Validate ID doesn't already exist
+                if (users[id]) {
+                    showNotification('User ID already exists', 'error');
+                    return;
+                }
+                
+                // Create new user
+                users[id] = {
+                    name,
+                    role,
+                    password,
+                    avatar: name.charAt(0),
+                    position,
+                    email,
+                    phone
+                };
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: `Created new crew member ${name}`
+                });
+                
+                createCrewModal.classList.remove('active');
+                showNotification('Crew member created successfully', 'success');
+                showEditCrew();
+            });
+            
+            document.getElementById('cancelCreateCrew').addEventListener('click', () => {
+                createCrewModal.classList.remove('active');
+            });
+            
+            // Edit Crew Modal
+            document.getElementById('editCrewForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editCrewId').value;
+                const name = document.getElementById('editCrewName').value;
+                const role = document.getElementById('editCrewRole').value;
+                const position = document.getElementById('editCrewPosition').value;
+                const email = document.getElementById('editCrewEmail').value;
+                const phone = document.getElementById('editCrewPhone').value;
+                
+                // Update user
+                users[id].name = name;
+                users[id].role = role;
+                users[id].position = position;
+                users[id].email = email;
+                users[id].phone = phone;
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: `Updated crew member ${name}`
+                });
+                
+                editCrewModal.classList.remove('active');
+                showNotification('Crew member updated successfully', 'success');
+                showEditCrew();
+            });
+            
+            document.getElementById('cancelEditCrew').addEventListener('click', () => {
+                editCrewModal.classList.remove('active');
+            });
+            
+            // Edit Position Modal
+            document.getElementById('editPositionForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('positionCrewId').value;
+                const newPosition = document.getElementById('newPosition').value;
+                const reason = document.getElementById('positionChangeReason').value;
+                
+                // Update position
+                users[id].position = newPosition;
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: `Changed position for ${users[id].name} to ${newPosition}`
+                });
+                
+                editPositionModal.classList.remove('active');
+                showNotification('Job position updated successfully', 'success');
+                showEditPosition();
+            });
+            
+            document.getElementById('cancelPositionChange').addEventListener('click', () => {
+                editPositionModal.classList.remove('active');
+            });
+            
+            // Termination Modal
+            document.getElementById('terminateForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('terminateCrewId').value;
+                const name = document.getElementById('terminateCrewName').value;
+                const reason = document.getElementById('terminationReason').value;
+                const date = document.getElementById('terminationDate').value;
+                
+                // Delete user
+                delete users[id];
+                
+                // Add to system logs
+                systemLogs.push({
+                    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    userId: currentUser.id,
+                    action: `Terminated crew member ${name} on ${date}`
+                });
+                
+                terminateModal.classList.remove('active');
+                showNotification('Crew member terminated successfully', 'success');
+                showTerminateCrew();
+            });
+            
+            document.getElementById('cancelTermination').addEventListener('click', () => {
+                terminateModal.classList.remove('active');
+            });
+            
+            // Close modal buttons
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.modal').classList.remove('active');
+                });
+            });
+        }
+        
+        // Login functionality
+        loginBtn.addEventListener('click', () => {
+            const userId = userIdInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!validatePassword(password)) {
+                showNotification('Password does not meet complexity requirements', 'error');
+                return;
+            }
+            
+            const user = users[userId];
+            
+            if (!user) {
+                showNotification('Invalid user ID', 'error');
+                return;
+            }
+            
+            if (user.password !== password) {
+                showNotification('Invalid password', 'error');
+                return;
+            }
+            
+            // Log login attempt
+            console.log(`User ${userId} (${user.name}) logged in from IP ${userIP.textContent}`);
+            
+            // Update UI for logged in user
+            userAvatar.textContent = user.avatar;
+            userName.textContent = `${user.name} (ID: ${userId})`;
+            userRole.textContent = user.role;
+            
+            // Show dashboard
+            loginContainer.classList.add('hidden');
+            setTimeout(() => {
+                dashboard.classList.add('active');
+            }, 500);
+            
+            // Set current user
+            currentUser = user;
+            
+            showNotification(`Welcome, ${user.name}!`, 'success');
+        });
+        
+        // Toggle sidebar
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+        
+        // Password validation on input
+        passwordInput.addEventListener('input', () => {
+            validatePassword(passwordInput.value);
+        });
+        
+        // Menu item click handler
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const feature = item.dataset.feature;
+                showFeature(feature);
+            });
+        });
+        
+        // Initialize
+        updateSystemTime();
+        setInterval(updateSystemTime, 60000); // Update every minute
+        
+        // Simulate IP address
+        userIP.textContent = '192.168.1.' + Math.floor(Math.random() * 255);
+        
+        // Setup modal event listeners
+        setupModalEventListeners();
+        
+        // Show login form
+        loginContainer.classList.remove('hidden');
+    </script>
+</body>
+</html>
